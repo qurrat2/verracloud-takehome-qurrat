@@ -27,6 +27,25 @@ public class HoldingsServiceTests
     }
 
     [Fact]
+    public async Task AddAsync_throws_when_ticker_already_has_holding()
+    {
+        var ticker = new Ticker { Id = 1, Code = "AAPL", Name = "Apple", CurrentPrice = 150m, LastUpdatedAt = DateTimeOffset.UtcNow };
+        var tickerRepo = new Mock<ITickerRepository>();
+        tickerRepo.Setup(r => r.GetByCodeAsync("AAPL", It.IsAny<CancellationToken>())).ReturnsAsync(ticker);
+
+        var holdingRepo = new Mock<IHoldingRepository>();
+        holdingRepo.Setup(r => r.ExistsForTickerAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+
+        var sut = new HoldingsService(holdingRepo.Object, tickerRepo.Object);
+        var req = new AddHoldingRequest { TickerCode = "AAPL", Quantity = 1m, PurchasePrice = 10m };
+
+        await sut.Invoking(s => s.AddAsync(req))
+            .Should()
+            .ThrowAsync<ArgumentException>()
+            .WithMessage("Holding for ticker 'AAPL' already exists.");
+    }
+
+    [Fact]
     public async Task AddAsync_creates_holding_and_returns_dto()
     {
         var holdingRepo = new Mock<IHoldingRepository>();
@@ -69,8 +88,8 @@ public class HoldingsServiceTests
         result.Should().HaveCount(1);
         result[0].Ticker.Should().Be("AAPL");
         result[0].CurrentPrice.Should().Be(150m);
-        result[0].MarketValue.Should().Be(450m);       // 3 × 150
-        result[0].UnrealizedPnL.Should().Be(150m);     // (150 - 100) × 3
+        result[0].MarketValue.Should().Be(450m);       // 3 ï¿½ 150
+        result[0].UnrealizedPnL.Should().Be(150m);     // (150 - 100) ï¿½ 3
     }
 
     [Fact]
@@ -86,8 +105,8 @@ public class HoldingsServiceTests
 
         var result = await sut.ListAsync();
 
-        result[0].MarketValue.Should().Be(300m);       // 2 × 150
-        result[0].UnrealizedPnL.Should().Be(-100m);    // (150 - 200) × 2  — sign must survive
+        result[0].MarketValue.Should().Be(300m);       // 2 ï¿½ 150
+        result[0].UnrealizedPnL.Should().Be(-100m);    // (150 - 200) ï¿½ 2  ï¿½ sign must survive
     }
 
     [Fact]
@@ -103,8 +122,8 @@ public class HoldingsServiceTests
 
         var result = await sut.ListAsync();
 
-        result[0].MarketValue.Should().Be(75m);        // 0.5 × 150
-        result[0].UnrealizedPnL.Should().Be(25m);      // (150 - 100) × 0.5  — fractional math intact
+        result[0].MarketValue.Should().Be(75m);        // 0.5 ï¿½ 150
+        result[0].UnrealizedPnL.Should().Be(25m);      // (150 - 100) ï¿½ 0.5  ï¿½ fractional math intact
     }
 
     [Fact]
@@ -124,6 +143,6 @@ public class HoldingsServiceTests
 
         result[0].CurrentPrice.Should().Be(0m);
         result[0].MarketValue.Should().Be(0m);
-        result[0].UnrealizedPnL.Should().Be(-100m);    // (0 - 25) × 4
+        result[0].UnrealizedPnL.Should().Be(-100m);    // (0 - 25) ï¿½ 4
     }
 }

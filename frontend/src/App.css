@@ -45,3 +45,32 @@
 .error {
     color: #c62828;
 }
+
+.add-holding-form {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+    .form-row label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .form-row input {
+        padding: 0.4rem 0.5rem;
+        font-size: 1rem;
+    }
+
+    .form-row button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+    }

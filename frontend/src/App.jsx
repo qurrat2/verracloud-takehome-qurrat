@@ -1,3 +1,4 @@
+import AddHoldingForm from './components/AddHoldingForm';
 import HoldingsTable from './components/HoldingsTable';
 import './App.css';
 
@@ -8,6 +9,10 @@ export default function App() {
                 <h1>Portfolio Dashboard</h1>
             </header>
             <main>
+                <section>
+                    <h2>Add Holding</h2>
+                    <AddHoldingForm />
+                </section>
                 <section>
                     <h2>Holdings</h2>
                     <HoldingsTable />
