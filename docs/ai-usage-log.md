@@ -18,6 +18,7 @@
 - Copilot omitted the `Holdings` to `Tickers` foreign key; added it with `OnDelete(Restrict)`.
 - AI left the wired `Program.cs` and connection string at the repo root, outside the project, so the app never actually ran; moved them into `Portfolio.Api` and deleted the strays.
 - The generated test project referenced the API with the wrong relative path, so the tests never built; fixed the reference.
+- The AI's background refresh service had no error logging, so a failed price refresh would have failed silently every 10 seconds with no trace; I added structured `LogError` in the catch with a log-and-continue policy, so failures are visible without killing the loop.
 
 ## Reflection
 AI was fastest at the mechanical work: scaffolding, boilerplate, and surfacing standard modeling conventions. It was least reliable on cross-file wiring and on assumptions that do not hold for the chosen stack (SQLite rowversion, project-relative paths, where generated files land). The pattern I leaned on was to treat AI output as a first draft to inspect against the spec and actually run, not as finished code.
