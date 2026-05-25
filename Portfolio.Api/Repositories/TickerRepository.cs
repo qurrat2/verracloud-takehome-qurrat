@@ -32,9 +32,8 @@ public class TickerRepository : ITickerRepository
             .ToListAsync(ct);
     }
 
-    public async Task UpdateAsync(Ticker ticker, CancellationToken ct = default)
+    public async Task<List<Ticker>> ListTrackedAsync(CancellationToken ct = default)
     {
-        _db.Tickers.Update(ticker);
-        await _db.SaveChangesAsync(ct);
+        return await _db.Tickers.ToListAsync(ct);
     }
 }

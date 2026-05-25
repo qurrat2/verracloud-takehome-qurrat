@@ -1,15 +1,27 @@
+using Microsoft.EntityFrameworkCore;
+using Portfolio.Api.Data;
+using Portfolio.Api.Repositories;
+using Portfolio.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<PortfolioDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("PortfolioDb")
+        ?? "Data Source=portfolio.db"));
+
+builder.Services.AddScoped<ITickerRepository, TickerRepository>();
+builder.Services.AddScoped<IHoldingRepository, HoldingRepository>();
+builder.Services.AddScoped<IPriceRepository, PriceRepository>();
+
+builder.Services.AddScoped<IHoldingsService, HoldingsService>();
+builder.Services.AddScoped<IPricesService, PricesService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -17,9 +29,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
+    await db.Database.MigrateAsync();
+    await SeedRunner.SeedAsync(db);
+}
 
 app.Run();
