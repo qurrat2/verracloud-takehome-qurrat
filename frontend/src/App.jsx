@@ -33,7 +33,7 @@ export default function App() {
     return (
         <div className="app">
             <header className="app-header">
-                <h1>Portfolio Dashboard</h1>
+                <h1>Portfolio Holdings Dashboard</h1>
                 <div className="header-actions">
                     <button onClick={() => window.location.reload()}>Refresh</button>
                     <button className="btn-secondary" onClick={onReset} disabled={isResetting}>
