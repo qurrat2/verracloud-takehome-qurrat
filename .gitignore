@@ -6,7 +6,7 @@
 # dotenv files
 .env
 
-# local only doc (proprietary, attached locally for Copilot context only)
+# local only doc (proprietary, attached locally for context only)
 docs-local/
 
 # User-specific files

@@ -9,6 +9,7 @@ public class PortfolioDbContext : DbContext
 
     public DbSet<Ticker> Tickers => Set<Ticker>();
     public DbSet<Holding> Holdings => Set<Holding>();
+    public DbSet<Price> Prices => Set<Price>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -59,6 +60,25 @@ public class PortfolioDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(h => h.TickerId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<Price>(b =>
+        {
+            b.HasKey(p => p.Id);
+
+            b.Property(p => p.Value)
+                .HasPrecision(18, 4);
+
+            b.Property(p => p.AsOf)
+                .IsRequired();
+
+            // History rows are queried per ticker, newest first.
+            b.HasIndex(p => new { p.TickerId, p.AsOf });
+
+            b.HasOne(p => p.Ticker)
+                .WithMany()
+                .HasForeignKey(p => p.TickerId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
