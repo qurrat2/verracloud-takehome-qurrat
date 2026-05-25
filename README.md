@@ -66,7 +66,7 @@ The frontend uses RTK Query to fetch and cache data, polling holdings/prices eve
 
 **Why the backend is structured this way.** The layered split keeps each concern testable and swappable: services are unit-tested with mocked repositories, and the repository boundary means the database could move off SQLite without touching business logic. DTOs at the HTTP boundary keep the persistence model private.
 
-**Schema: one `Tickers` table, not a separate `Prices` table.** Price is 1:1 with a ticker and carries no history of its own, so it lives on `Tickers`. `GET /api/prices` still returns the spec-shaped `{ ticker, currentPrice, lastUpdatedAt }`. A separate `Price` history table exists only to back the trend chart.
+**Schema: one `Tickers` table, not a separate `Prices` table.** Price is 1:1 with a ticker and carries no details of its own, so it lives on `Tickers`. `GET /api/prices` still returns the spec-shaped `{ ticker, currentPrice, lastUpdatedAt }`. A separate `Price` history table exists only to back the trend chart.
 
 **Concurrency: SQLite in WAL mode (a known trade-off).** WAL decouples the polling reads from the background-refresh writes, but it does not remove write-to-write contention; pairing it with a `busy_timeout` would let a concurrent write wait rather than error. The cleaner design would keep the simulated current prices in memory so the price churn never touches the transactional store at all, with WAL being the pragmatic choice while prices live in SQLite.
 
