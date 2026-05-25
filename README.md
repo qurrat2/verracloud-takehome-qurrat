@@ -72,6 +72,20 @@ The frontend uses RTK Query to fetch and cache data, polling holdings/prices eve
 
 **What I would improve with another 2 hours.** Add a `Users` table with authentication/authorization so each user logs in and sees only their own holdings. Support partial sells, since deleting a holding currently removes the whole position when a user may want to reduce the quantity and keep the rest. Persist a few months of per-user P&L history to chart performance over time. Replacing the 5s polling with SignalR push would be a follow-up after that.
 
+## Edge cases covered
+
+- Negative or zero quantity is rejected with a clear message (validated server-side, unit tested).
+- Negative purchase price is rejected (validated server-side, unit tested).
+- Unknown ticker on add returns a 400 naming the ticker code.
+- Fractional share quantities are supported via `decimal` (unit tested).
+- A ticker with no price yet (`currentPrice = 0`) computes safely server-side (unit tested) and shows "Not priced yet" / "N/A" in the table instead of a misleading `$0.00`.
+- Losses show negative P&L in red; gains in green.
+- Multiple holdings of the same ticker are allowed; adding an identical holding within 2 minutes prompts a confirmation.
+- Add and delete both ask for confirmation.
+- Every data view has explicit loading and error states; a failed background poll keeps showing the last good values rather than blanking the UI.
+- The holdings table filters by ticker and paginates at 5 rows per page.
+- SQLite runs in WAL mode so polling reads do not block the background refresh writes, and the refresh logs and continues on failure rather than killing the loop.
+
 ## Notes (dev only)
 
 - CORS allows any `localhost` origin so the frontend works on any Vite port; production should pin the real origin.
