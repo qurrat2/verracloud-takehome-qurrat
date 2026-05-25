@@ -40,7 +40,6 @@ dotnet test
 From WSL in the repo root:
 
 ```bash
-cd /mnt/f/Arslan/git/verracloud-takehome-qurrat
 podman compose up --build
 ```
 
