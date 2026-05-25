@@ -68,6 +68,8 @@ The frontend uses RTK Query to fetch and cache data, polling holdings/prices eve
 
 **Schema: one `Tickers` table, not a separate `Prices` table.** Price is 1:1 with a ticker and timestamp and carries no history of its own, so it lives on `Tickers`. `GET /api/prices` still returns the spec-shaped `{ ticker, currentPrice, lastUpdatedAt }`. A separate `Price` history table exists only to back the trend chart.
 
+**Concurrency: SQLite in WAL mode (a known trade-off).** WAL decouples the polling reads from the background-refresh writes, but it does not remove write-to-write contention; pairing it with a `busy_timeout` would let a concurrent write wait rather than error. The cleaner design would keep the simulated current prices in memory so the price churn never touches the transactional store at all, with WAL being the pragmatic choice while prices live in SQLite.
+
 **How to scale to 10,000 concurrent users.** This build is a demo: SQLite is a single-writer file database and the client polls every 5s. To scale I would move to Postgres/SQL Server with connection pooling, replace polling with server push (SignalR/WebSockets) backed by a Redis cache for prices, run the price refresh as a separate worker, put the stateless API behind a load balancer, and serve the SPA from a CDN.
 
 **What I would improve with another 2 hours.** Add a `Users` table with authentication/authorization so each user logs in and sees only their own holdings. Support partial sells, since deleting a holding currently removes the whole position when a user may want to reduce the quantity and keep the rest. Persist a few months of per-user P&L history to chart performance over time. Replacing the 5s polling with SignalR push would be a follow-up after that.
