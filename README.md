@@ -94,3 +94,7 @@ The frontend uses RTK Query to fetch and cache data, polling holdings/prices eve
 - Optimistic concurrency is not implemented: SQLite has no server-side rowversion, so it would be a no-op here.
 
 See `docs/ai-usage-log.md` for how AI tools were used on this project.
+
+Thanks for reviewing.
+Regards,
+Qurrat
