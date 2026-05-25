@@ -13,6 +13,12 @@ export default function HoldingsTable() {
 
     const [deleteHolding, { isLoading: isDeleting }] = useDeleteHoldingMutation();
 
+    const onDelete = (h) => {
+        if (window.confirm(`Delete your ${h.ticker} holding (${h.quantity} @ ${currency.format(h.purchasePrice)})?`)) {
+            deleteHolding(h.id);
+        }
+    };
+
     if (isLoading) return <p>Loading holdings...</p>;
     if (isError) {
         const message = error?.data?.detail ?? error?.error ?? 'Unknown error';
@@ -46,7 +52,7 @@ export default function HoldingsTable() {
                                 {currency.format(h.unrealizedPnL)}
                             </td>
                             <td>
-                                <button onClick={() => deleteHolding(h.id)} disabled={isDeleting}>
+                                <button onClick={() => onDelete(h)} disabled={isDeleting}>
                                     Delete
                                 </button>
                             </td>
