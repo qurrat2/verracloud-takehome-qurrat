@@ -15,10 +15,15 @@
 - Copilot scaffolded the data layer but omitted the EF Core NuGet packages; caught by inspection before the build and added them.
 - Copilot left out the `Program.cs` DI and migrate/seed wiring that was part of the same prompt; wrote it by hand.
 - Copilot first configured a unique index on `Holdings.TickerId`; relaxed it to non-unique so one ticker can hold multiple positions.
-- Copilot omitted the `Holdings` to `Tickers` foreign key; added it with `OnDelete(Restrict)`.
+- Copilot omitted the `Holdings` to `Tickers` foreign key, so there was no relational link between a holding and its ticker; added it with `OnDelete(Restrict)`.
 - AI left the wired `Program.cs` and connection string at the repo root, outside the project, so the app never actually ran; moved them into `Portfolio.Api` and deleted the strays.
 - The generated test project referenced the API with the wrong relative path, so the tests never built; fixed the reference.
 - The AI's background refresh service had no error logging, so a failed price refresh would have failed silently every 10 seconds with no trace; I added structured `LogError` in the catch with a log-and-continue policy, so failures are visible without killing the loop.
+
+## Where I pushed back on AI's approach
+- AI rewrote the "ticker not found" error to expose the internal database id; I pushed back because users only know ticker codes, so we kept the add flow and its messages code-based and carried the id only inside the payload.
+- AI tried to bound the growing price-history query with a per-ticker top-N loop; I rejected the extra round-trips and we fixed the real cause instead, enabling SQLite WAL mode so polling reads stop blocking the background refresh writes.
+- AI placed the global exception handler under an `Infrastructure/` folder; I pushed back on the extra layer for a project this size and moved it to the project root.
 
 ## Reflection
 AI was fastest at the mechanical work: scaffolding, boilerplate, and surfacing standard modeling conventions. It was least reliable on cross-file wiring and on assumptions that do not hold for the chosen stack (SQLite rowversion, project-relative paths, where generated files land). The pattern I leaned on was to treat AI output as a first draft to inspect against the spec and actually run, not as finished code.

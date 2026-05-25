@@ -2,8 +2,10 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const portfolioApi = createApi({
     reducerPath: 'portfolioApi',
-    baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:5282/api/' }),
-    tagTypes: ['Holdings'],
+    baseQuery: fetchBaseQuery({
+        baseUrl: import.meta.env.VITE_API_URL ?? 'http://localhost:5282/api/',
+    }),
+    tagTypes: ['Holdings', 'Prices'],
     endpoints: (builder) => ({
         listHoldings: builder.query({
             query: () => 'holdings',
@@ -15,14 +17,38 @@ export const portfolioApi = createApi({
                 method: 'POST',
                 body,
             }),
-            invalidatesTags: ['Holdings'],
+            // A new holding can add a ticker to the trend chart, so refresh prices too.
+            invalidatesTags: ['Holdings', 'Prices'],
         }),
         deleteHolding: builder.mutation({
             query: (id) => ({
                 url: `holdings/${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Holdings'],
+            invalidatesTags: ['Holdings', 'Prices'],
+        }),
+        listPrices: builder.query({
+            query: () => 'prices',
+            providesTags: ['Prices'],
+        }),
+        listPriceHistory: builder.query({
+            query: () => 'prices/history',
+            providesTags: ['Prices'],
+        }),
+        refreshPrices: builder.mutation({
+            query: () => ({
+                url: 'prices/refresh',
+                method: 'POST',
+            }),
+            // New prices change holding market values, so refresh both.
+            invalidatesTags: ['Prices', 'Holdings'],
+        }),
+        resetSeed: builder.mutation({
+            query: () => ({
+                url: 'seed/reset',
+                method: 'POST',
+            }),
+            invalidatesTags: ['Prices', 'Holdings'],
         }),
     }),
 });
@@ -31,4 +57,8 @@ export const {
     useListHoldingsQuery,
     useAddHoldingMutation,
     useDeleteHoldingMutation,
+    useListPricesQuery,
+    useListPriceHistoryQuery,
+    useRefreshPricesMutation,
+    useResetSeedMutation,
 } = portfolioApi;
