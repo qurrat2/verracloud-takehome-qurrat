@@ -26,23 +26,32 @@ public class HoldingsServiceTests
         await sut.Invoking(s => s.AddAsync(req)).Should().ThrowAsync<ArgumentException>();
     }
 
-    [Fact]
-    public async Task AddAsync_throws_when_ticker_already_has_holding()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public async Task AddAsync_throws_when_quantity_not_positive(decimal quantity)
     {
-        var ticker = new Ticker { Id = 1, Code = "AAPL", Name = "Apple", CurrentPrice = 150m, LastUpdatedAt = DateTimeOffset.UtcNow };
-        var tickerRepo = new Mock<ITickerRepository>();
-        tickerRepo.Setup(r => r.GetByCodeAsync("AAPL", It.IsAny<CancellationToken>())).ReturnsAsync(ticker);
+        var sut = new HoldingsService(new Mock<IHoldingRepository>().Object, new Mock<ITickerRepository>().Object);
 
-        var holdingRepo = new Mock<IHoldingRepository>();
-        holdingRepo.Setup(r => r.ExistsForTickerAsync(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
-
-        var sut = new HoldingsService(holdingRepo.Object, tickerRepo.Object);
-        var req = new AddHoldingRequest { TickerCode = "AAPL", Quantity = 1m, PurchasePrice = 10m };
+        var req = new AddHoldingRequest { TickerCode = "AAPL", Quantity = quantity, PurchasePrice = 10m };
 
         await sut.Invoking(s => s.AddAsync(req))
             .Should()
             .ThrowAsync<ArgumentException>()
-            .WithMessage("Holding for ticker 'AAPL' already exists.");
+            .WithMessage("Quantity must be positive*");
+    }
+
+    [Fact]
+    public async Task AddAsync_throws_when_purchase_price_negative()
+    {
+        var sut = new HoldingsService(new Mock<IHoldingRepository>().Object, new Mock<ITickerRepository>().Object);
+
+        var req = new AddHoldingRequest { TickerCode = "AAPL", Quantity = 1m, PurchasePrice = -5m };
+
+        await sut.Invoking(s => s.AddAsync(req))
+            .Should()
+            .ThrowAsync<ArgumentException>()
+            .WithMessage("PurchasePrice must be non-negative*");
     }
 
     [Fact]

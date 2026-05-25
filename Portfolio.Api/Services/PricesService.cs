@@ -10,17 +10,41 @@ public class PricesService : IPricesService
 
     private readonly ITickerRepository _tickerRepo;
     private readonly IPriceRepository _priceRepo;
+    private readonly IHoldingRepository _holdingRepo;
 
-    public PricesService(ITickerRepository tickerRepo, IPriceRepository priceRepo)
+    public PricesService(ITickerRepository tickerRepo, IPriceRepository priceRepo, IHoldingRepository holdingRepo)
     {
         _tickerRepo = tickerRepo;
         _priceRepo = priceRepo;
+        _holdingRepo = holdingRepo;
     }
 
     public async Task<List<PriceDto>> ListAsync(CancellationToken ct = default)
     {
         var tickers = await _tickerRepo.ListAsync(ct);
         return tickers.Select(ToDto).ToList();
+    }
+
+    public async Task<List<PriceHistorySeriesDto>> GetHistoryAsync(CancellationToken ct = default)
+    {
+        var holdings = await _holdingRepo.ListAsync(ct);
+        var tickerIds = holdings.Select(h => h.TickerId).Distinct().ToList();
+        if (tickerIds.Count == 0)
+            return new List<PriceHistorySeriesDto>();
+
+        var history = await _priceRepo.ListHistoryAsync(tickerIds, ct);
+
+        return history
+            .GroupBy(p => p.Ticker.Code)
+            .Select(g => new PriceHistorySeriesDto
+            {
+                Ticker = g.Key,
+                Points = g.OrderBy(p => p.AsOf)
+                    .Select(p => new PriceHistoryPointDto { AsOf = p.AsOf, Value = p.Value })
+                    .ToList()
+            })
+            .OrderBy(s => s.Ticker)
+            .ToList();
     }
 
     public async Task<List<PriceDto>> RefreshAsync(CancellationToken ct = default)
@@ -52,7 +76,9 @@ public class PricesService : IPricesService
 
     private static PriceDto ToDto(Ticker t) => new()
     {
+        TickerId = t.Id,
         Ticker = t.Code,
+        Name = t.Name,
         CurrentPrice = t.CurrentPrice,
         LastUpdatedAt = t.LastUpdatedAt
     };

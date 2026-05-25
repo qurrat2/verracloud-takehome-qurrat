@@ -21,6 +21,12 @@ public class PricesController : ControllerBase
         return await _service.ListAsync(ct);
     }
 
+    [HttpGet("history")]
+    public async Task<IEnumerable<PriceHistorySeriesDto>> History(CancellationToken ct)
+    {
+        return await _service.GetHistoryAsync(ct);
+    }
+
     [HttpPost("refresh")]
     public async Task<IEnumerable<PriceDto>> Refresh(CancellationToken ct)
     {

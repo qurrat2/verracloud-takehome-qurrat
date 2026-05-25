@@ -1,6 +1,5 @@
 import { useListHoldingsQuery, useDeleteHoldingMutation } from '../portfolioApi';
-
-const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+import { currency } from '../portfolio';
 
 export default function HoldingsTable() {
     const {
@@ -28,31 +27,31 @@ export default function HoldingsTable() {
 
     return (
         <div>
-            <table className="holdings-table">
+            <table className="data-table">
                 <thead>
                     <tr>
                         <th>Ticker</th>
-                        <th>Quantity</th>
-                        <th>Purchase Price</th>
-                        <th>Current Price</th>
-                        <th>Market Value</th>
-                        <th>P&amp;L</th>
+                        <th className="num">Quantity</th>
+                        <th className="num">Purchase Price</th>
+                        <th className="num">Current Price</th>
+                        <th className="num">Market Value</th>
+                        <th className="num">P&amp;L</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {holdings.map((h) => (
                         <tr key={h.id}>
-                            <td>{h.ticker}</td>
-                            <td>{h.quantity}</td>
-                            <td>{currency.format(h.purchasePrice)}</td>
-                            <td>{currency.format(h.currentPrice)}</td>
-                            <td>{currency.format(h.marketValue)}</td>
-                            <td className={h.unrealizedPnL >= 0 ? 'pnl-positive' : 'pnl-negative'}>
+                            <td className="ticker-cell">{h.ticker}</td>
+                            <td className="num">{h.quantity}</td>
+                            <td className="num">{currency.format(h.purchasePrice)}</td>
+                            <td className="num">{currency.format(h.currentPrice)}</td>
+                            <td className="num">{currency.format(h.marketValue)}</td>
+                            <td className={`num ${h.unrealizedPnL >= 0 ? 'pnl-positive' : 'pnl-negative'}`}>
                                 {currency.format(h.unrealizedPnL)}
                             </td>
                             <td>
-                                <button onClick={() => onDelete(h)} disabled={isDeleting}>
+                                <button className="link-danger" onClick={() => onDelete(h)} disabled={isDeleting}>
                                     Delete
                                 </button>
                             </td>

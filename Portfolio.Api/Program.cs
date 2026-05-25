@@ -21,7 +21,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy(DevCorsPolicy, policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        // Dev only: allow the frontend on any localhost port, since Vite falls
+        // back to 5174+ when 5173 is taken.
+        policy.SetIsOriginAllowed(origin =>
+            {
+                var host = new Uri(origin).Host;
+                return host == "localhost" || host == "127.0.0.1";
+            })
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -59,6 +65,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<PortfolioDbContext>();
     await db.Database.MigrateAsync();
+    // WAL lets the polling reads run concurrently with the background refresh
+    // writes instead of blocking on SQLite's default journal mode.
+    await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
     await SeedRunner.SeedAsync(db);
 }
 

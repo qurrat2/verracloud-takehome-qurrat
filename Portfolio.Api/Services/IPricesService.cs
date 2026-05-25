@@ -5,5 +5,6 @@ namespace Portfolio.Api.Services;
 public interface IPricesService
 {
     Task<List<PriceDto>> ListAsync(CancellationToken ct = default);
+    Task<List<PriceHistorySeriesDto>> GetHistoryAsync(CancellationToken ct = default);
     Task<List<PriceDto>> RefreshAsync(CancellationToken ct = default);
 }

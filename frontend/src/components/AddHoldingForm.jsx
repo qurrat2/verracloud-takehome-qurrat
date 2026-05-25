@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAddHoldingMutation, useListHoldingsQuery } from '../portfolioApi';
+import { useAddHoldingMutation, useListHoldingsQuery, useListPricesQuery } from '../portfolioApi';
 
 const initialForm = { tickerCode: '', quantity: '', purchasePrice: '' };
 const DUPLICATE_WINDOW_MS = 2 * 60 * 1000;
@@ -8,6 +8,7 @@ export default function AddHoldingForm() {
     const [form, setForm] = useState(initialForm);
     const [addHolding, { isLoading, error, reset }] = useAddHoldingMutation();
     const { data: holdings = [] } = useListHoldingsQuery();
+    const { data: tickers = [] } = useListPricesQuery();
 
     const onChange = (e) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -50,15 +51,16 @@ export default function AddHoldingForm() {
             <div className="form-row">
                 <label>
                     Ticker
-                    <input
-                        name="tickerCode"
-                        value={form.tickerCode}
-                        onChange={onChange}
-                        placeholder="AAPL"
-                        required
-                        maxLength={10}
-                        autoComplete="off"
-                    />
+                    <select name="tickerCode" value={form.tickerCode} onChange={onChange} required>
+                        <option value="" disabled>
+                            Select a ticker
+                        </option>
+                        {tickers.map((t) => (
+                            <option key={t.tickerId} value={t.ticker}>
+                                {t.ticker} - {t.name}
+                            </option>
+                        ))}
+                    </select>
                 </label>
                 <label>
                     Quantity
