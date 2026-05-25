@@ -1,0 +1,47 @@
+.app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+    text-align: left;
+}
+
+.app-header {
+    margin-bottom: 1.5rem;
+}
+
+.holdings-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+
+    .holdings-table th,
+    .holdings-table td {
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(127, 127, 127, 0.3);
+    }
+
+    .holdings-table th {
+        font-weight: 600;
+    }
+
+.pnl-positive {
+    color: #2e7d32;
+    font-weight: 600;
+}
+
+.pnl-negative {
+    color: #c62828;
+    font-weight: 600;
+}
+
+.last-updated {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.error {
+    color: #c62828;
+}

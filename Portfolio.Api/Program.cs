@@ -16,6 +16,17 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddDbContext<PortfolioDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("PortfolioDb")
         ?? "Data Source=portfolio.db"));
+const string DevCorsPolicy = "AllowDevFrontend";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(DevCorsPolicy, policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 
 builder.Services.AddScoped<ITickerRepository, TickerRepository>();
 builder.Services.AddScoped<IHoldingRepository, HoldingRepository>();
@@ -36,7 +47,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+app.UseCors(DevCorsPolicy);
 app.UseAuthorization();
 app.MapControllers();
 
