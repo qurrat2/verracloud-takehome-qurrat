@@ -21,5 +21,6 @@
   - `try/catch` without a meaningful handler
 
   ## Working notes
+  - Spec: `docs-local/VerraCloud Project TEST.pdf` (proprietary; folder is gitignored, local-only). The canonical source of truth for endpoint contracts, validation rules, and the database schema. Attach to chat context when working on contract-bound decisions
   - Decisions and overrides are logged in `docs/ai-decisions.md` as the project progresses
   - This file grows with the project; rules for layers not yet built will be appended when those layers land
