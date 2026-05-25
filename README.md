@@ -66,7 +66,7 @@ The frontend uses RTK Query to fetch and cache data, polling holdings/prices eve
 
 **Why the backend is structured this way.** The layered split keeps each concern testable and swappable: services are unit-tested with mocked repositories, and the repository boundary means the database could move off SQLite without touching business logic. DTOs at the HTTP boundary keep the persistence model private.
 
-**Schema: one `Tickers` table, not a separate `Prices` table.** Price is 1:1 with a ticker and carries no history of its own, so it lives on `Tickers`. `GET /api/prices` still returns the spec-shaped `{ ticker, currentPrice, lastUpdatedAt }`. A separate `Price` history table exists only to back the trend chart.
+**Schema: one `Tickers` table, not a separate `Prices` table.** Price is 1:1 with a ticker and timestamp and carries no history of its own, so it lives on `Tickers`. `GET /api/prices` still returns the spec-shaped `{ ticker, currentPrice, lastUpdatedAt }`. A separate `Price` history table exists only to back the trend chart.
 
 **How to scale to 10,000 concurrent users.** This build is a demo: SQLite is a single-writer file database and the client polls every 5s. To scale I would move to Postgres/SQL Server with connection pooling, replace polling with server push (SignalR/WebSockets) backed by a Redis cache for prices, run the price refresh as a separate worker, put the stateless API behind a load balancer, and serve the SPA from a CDN.
 
