@@ -35,6 +35,28 @@ npm run dev
 dotnet test
 ```
 
+## Run with Podman
+
+From WSL in the repo root:
+
+```bash
+podman compose up --build
+```
+
+Open the frontend at `http://localhost:5173`. The backend API is available at `http://localhost:5282`.
+
+To stop and remove the services:
+
+```bash
+podman compose down
+```
+
+If your Podman version does not support `podman compose`, install `podman-compose` and run:
+
+```bash
+podman-compose -f docker-compose.yml up --build
+```
+
 ## Configuration
 
 The frontend API base URL defaults to `http://localhost:5282/api/`. To override it, copy `frontend/.env.example` to `frontend/.env` and set `VITE_API_URL`.
